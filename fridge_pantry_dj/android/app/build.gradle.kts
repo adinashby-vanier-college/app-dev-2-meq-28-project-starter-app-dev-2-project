@@ -9,6 +9,7 @@ android {
     namespace = "com.example.fridge_pantry_dj"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973" // for maps
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
