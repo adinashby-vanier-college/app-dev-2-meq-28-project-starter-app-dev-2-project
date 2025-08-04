@@ -1,7 +1,4 @@
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -13,112 +10,117 @@ class ShopAroundScreen extends StatefulWidget {
 }
 
 class _ShopAroundScreenState extends State<ShopAroundScreen> {
-  GoogleMapController? _mapController;
-  Set<Marker> _markers = {};
+  final TextEditingController _postalCodeController = TextEditingController();
+  List<Map<String, dynamic>> _places = [];
   bool showGroceries = true;
-  bool showSupermarkets = true;
-  LatLng? _currentLocation;
+  bool showRestaurants = true;
+  int selectedRadius = 2000;
   bool _isLoading = false;
+  String? _errorMessage;
 
-  // Replace with your actual Google Places API key
-  static const String _googleApiKey = 'AIzaSyBMqhWiKWbINSLWQLPTPeZYVb42YY6ZOb8';
+  // Enter Google Maps Key (remove before git add)
+  static const String _googleApiKey = '';
 
   @override
   void initState() {
     super.initState();
-    _initializeLocation();
   }
 
-  Future<void> _initializeLocation() async {
-    await requestLocationPermission();
-    await _getCurrentLocation();
-    if (_currentLocation != null) {
-      await _loadNearbyPlaces();
-    }
-  }
-
-  Future<void> requestLocationPermission() async {
-    final status = await Permission.location.request();
-
-    if (status.isGranted) {
-      debugPrint('✅ Location permission granted');
-    } else if (status.isDenied) {
-      debugPrint('❌ Location permission denied');
-    } else if (status.isPermanentlyDenied) {
-      debugPrint('⚠️ Location permission permanently denied. Opening app settings...');
-      await openAppSettings();
-    }
-  }
-
-  Future<void> _getCurrentLocation() async {
-    try {
+  Future<void> _searchPlaces() async {
+    final postalCode = _postalCodeController.text.trim();
+    if (postalCode.isEmpty) {
       setState(() {
-        _isLoading = true;
+        _errorMessage = 'Please enter your postal code';
       });
-
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      setState(() {
-        _currentLocation = LatLng(position.latitude, position.longitude);
-        _isLoading = false;
-      });
-
-      // Move camera to current location
-      if (_mapController != null) {
-        _mapController!.animateCamera(
-          CameraUpdate.newLatLng(_currentLocation!),
-        );
-      }
-    } catch (e) {
-      debugPrint('Error getting location: $e');
-      setState(() {
-        _isLoading = false;
-        // Fallback to Toronto coordinates
-        _currentLocation = const LatLng(43.6532, -79.3832);
-      });
+      return;
     }
-  }
-
-  Future<void> _loadNearbyPlaces() async {
-    if (_currentLocation == null) return;
 
     setState(() {
       _isLoading = true;
+      _errorMessage = null;
+      _places = [];
     });
 
     try {
-      final List<Marker> markers = [];
-
-      // Get groceries if selected
-      if (showGroceries) {
-        final groceryMarkers = await _searchPlaces('grocery_or_supermarket');
-        markers.addAll(groceryMarkers);
+      // First, geocode the postal code to get coordinates
+      final coordinates = await _geocodePostalCode(postalCode);
+      if (coordinates == null) {
+        setState(() {
+          _errorMessage = 'Invalid postal';
+          _isLoading = false;
+        });
+        return;
       }
 
-      // Get supermarkets if selected (and not already included in grocery search)
-      if (showSupermarkets && !showGroceries) {
-        final supermarketMarkers = await _searchPlaces('supermarket');
-        markers.addAll(supermarketMarkers);
+      final List<Map<String, dynamic>> allPlaces = [];
+
+      // Search for groceries if selected
+      if (showGroceries) {
+        final groceries = await _searchNearbyPlaces(
+          coordinates['lat'], 
+          coordinates['lng'], 
+          'grocery_or_supermarket'
+        );
+        allPlaces.addAll(groceries);
+      }
+
+      // Search for restaurants if selected
+      if (showRestaurants) {
+        final restaurants = await _searchNearbyPlaces(
+          coordinates['lat'], 
+          coordinates['lng'], 
+          'restaurant'
+        );
+        allPlaces.addAll(restaurants);
       }
 
       setState(() {
-        _markers = markers.toSet();
+        _places = allPlaces;
         _isLoading = false;
       });
     } catch (e) {
-      debugPrint('Error loading places: $e');
       setState(() {
+        _errorMessage = 'Error searching places: $e';
         _isLoading = false;
       });
     }
   }
 
-  Future<List<Marker>> _searchPlaces(String type) async {
+  Future<Map<String, dynamic>?> _geocodePostalCode(String postalCode) async {
+    final encodedPostalCode = Uri.encodeComponent(postalCode);
+    final String url = 'https://maps.googleapis.com/maps/api/geocode/json'
+        '?address=$encodedPostalCode&components=country:CA'
+        '&key=$_googleApiKey';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      debugPrint('Geocoding URL: $url');
+      debugPrint('Response status: ${response.statusCode}');
+      debugPrint('Response body: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'OK' && data['results'].isNotEmpty) {
+          final location = data['results'][0]['geometry']['location'];
+          return {
+            'lat': location['lat'],
+            'lng': location['lng'],
+          };
+        } else {
+          debugPrint('Geocoding failed. Status: ${data['status']}');
+        }
+      }
+    } catch (e) {
+      debugPrint('Geocoding error: $e');
+    }
+    return null;
+  }
+
+  Future<List<Map<String, dynamic>>> _searchNearbyPlaces(
+      double lat, double lng, String type) async {
     final String url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json'
-        '?location=${_currentLocation!.latitude},${_currentLocation!.longitude}'
-        '&radius=2000'
+        '?location=$lat,$lng'
+        '&radius=$selectedRadius'
         '&type=$type'
         '&key=$_googleApiKey';
 
@@ -127,37 +129,24 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final List<Marker> markers = [];
+        final List<Map<String, dynamic>> places = [];
 
         if (data['status'] == 'OK') {
           final results = data['results'] as List;
 
-          for (int i = 0; i < results.length && i < 20; i++) { // Limit to 20 results
+          for (int i = 0; i < results.length && i < 15; i++) {
             final place = results[i];
-            final location = place['geometry']['location'];
-            final name = place['name'] ?? 'Unknown Place';
-            final rating = place['rating']?.toString() ?? 'No rating';
-            final vicinity = place['vicinity'] ?? '';
-
-            markers.add(
-              Marker(
-                markerId: MarkerId(place['place_id']),
-                position: LatLng(
-                  location['lat'].toDouble(),
-                  location['lng'].toDouble(),
-                ),
-                infoWindow: InfoWindow(
-                  title: name,
-                  snippet: 'Rating: $rating\n$vicinity',
-                ),
-                icon: type == 'grocery_or_supermarket'
-                    ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen)
-                    : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-              ),
-            );
+            places.add({
+              'name': place['name'] ?? 'Unknown Place',
+              'rating': place['rating']?.toDouble() ?? 0.0,
+              'vicinity': place['vicinity'] ?? '',
+              'type': type == 'grocery_or_supermarket' ? 'Grocery' : 'Restaurant',
+              'place_id': place['place_id'],
+              'price_level': place['price_level'] ?? 0,
+            });
           }
         }
-        return markers;
+        return places;
       } else {
         debugPrint('Places API error: ${response.statusCode}');
         return [];
@@ -171,9 +160,14 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
   void _onCheckboxChanged(String type, bool value) {
     setState(() {
       if (type == 'groceries') showGroceries = value;
-      if (type == 'supermarkets') showSupermarkets = value;
+      if (type == 'restaurants') showRestaurants = value;
     });
-    _loadNearbyPlaces();
+  }
+
+  @override
+  void dispose() {
+    _postalCodeController.dispose();
+    super.dispose();
   }
 
   @override
@@ -218,9 +212,55 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
                 ),
               ),
 
-              // Checkboxes
+              // Postal Code Input
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  controller: _postalCodeController,
+                  decoration: InputDecoration(
+                    labelText: 'Enter Postal Code',
+                    hintText: 'e.g., H3H 2N8',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.8),
+                    suffixIcon: IconButton(
+                      onPressed: _searchPlaces,
+                      icon: const Icon(Icons.search),
+                    ),
+                  ),
+                  textCapitalization: TextCapitalization.characters,
+                ),
+              ),
+
+              // Radius Selection drop down
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  children: [
+                    const Text('Radius: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                    DropdownButton<int>(
+                      value: selectedRadius,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedRadius = value!;
+                        });
+                      },
+                      items: const [
+                        DropdownMenuItem(value: 1000, child: Text('1 km')),
+                        DropdownMenuItem(value: 2000, child: Text('2 km')),
+                        DropdownMenuItem(value: 5000, child: Text('5 km')),
+                        DropdownMenuItem(value: 10000, child: Text('10 km')),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Checkboxes for filters
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Row(
                   children: [
                     Checkbox(
@@ -231,16 +271,26 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
                     const Text('Groceries'),
                     const SizedBox(width: 16),
                     Checkbox(
-                      value: showSupermarkets,
+                      value: showRestaurants,
                       onChanged: (value) =>
-                          _onCheckboxChanged('supermarkets', value!),
+                          _onCheckboxChanged('restaurants', value!),
                     ),
-                    const Text('Supermarkets'),
+                    const Text('Restaurants'),
                   ],
                 ),
               ),
 
-              // Loading indicator or Google Map
+              // Error Message
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
+
+              // Results List
               Expanded(
                 child: _isLoading
                     ? const Center(
@@ -249,25 +299,59 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
                     children: [
                       CircularProgressIndicator(),
                       SizedBox(height: 16),
-                      Text('Loading nearby places...'),
+                      Text('Searching nearby places...'),
                     ],
                   ),
                 )
-                    : _currentLocation == null
+                    : _places.isEmpty
                     ? const Center(
-                  child: Text('Unable to get location'),
+                  child: Text('No places found. Try searching with a postal code.'),
                 )
-                    : GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: _currentLocation!,
-                    zoom: 14,
-                  ),
-                  onMapCreated: (controller) {
-                    _mapController = controller;
+                    : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _places.length,
+                  itemBuilder: (context, index) {
+                    final place = _places[index];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: place['type'] == 'Grocery' 
+                              ? Colors.green 
+                              : Colors.orange,
+                          child: Icon(
+                            place['type'] == 'Grocery' 
+                                ? Icons.shopping_cart 
+                                : Icons.restaurant,
+                            color: Colors.white,
+                          ),
+                        ),
+                        title: Text(
+                          place['name'],
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(place['vicinity']),
+                            Row(
+                              children: [
+                                Text('${place['type']} • '),
+                                if (place['rating'] > 0) ...[
+                                  const Icon(Icons.star, size: 16, color: Colors.amber),
+                                  Text(' ${place['rating'].toStringAsFixed(1)}'),
+                                ] else
+                                  const Text('No rating'),
+                              ],
+                            ),
+                          ],
+                        ),
+                        trailing: place['price_level'] > 0
+                            ? Text('\$' * place['price_level'])
+                            : null,
+                      ),
+                    );
                   },
-                  markers: _markers,
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: true,
                 ),
               ),
             ],

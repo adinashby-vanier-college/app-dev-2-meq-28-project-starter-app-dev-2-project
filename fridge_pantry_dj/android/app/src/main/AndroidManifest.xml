@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.fridge_pantry_dj">
     <application
         android:label="fridge_pantry_dj"
         android:name="${applicationName}"
@@ -33,7 +34,8 @@
             />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBMqhWiKWbINSLWQLPTPeZYVb42YY6ZOb8"/>
+        <!-- Enter API key Here but remove before git commit -->
+            android:value=""/>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
