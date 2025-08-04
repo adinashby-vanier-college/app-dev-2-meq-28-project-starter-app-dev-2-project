@@ -133,7 +133,7 @@ class WelcomeScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const MagicRecommendationsScreen()),
+                          MaterialPageRoute(builder: (context) => const ShopAroundScreen()),
                         );
                       },
                       style: OutlinedButton.styleFrom(
