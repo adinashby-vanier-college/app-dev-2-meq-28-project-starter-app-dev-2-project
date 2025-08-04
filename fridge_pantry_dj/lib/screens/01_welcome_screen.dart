@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '08_magic_recommendations_screen.dart';
+import '09_nutripal_screen.dart';
+import '10_shop_around_screen.dart';
+
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
@@ -116,6 +120,38 @@ class WelcomeScreen extends StatelessWidget {
                         style: TextStyle(
                           color: Color(0xFF5EAAA8),
                         ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Test Magic Recommendations Screen button For Rishard (Will be deleted, Later - Test Purpose))
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const MagicRecommendationsScreen()),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.teal, width: 2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        backgroundColor: Colors.white.withOpacity(0.85),
+                        textStyle: const TextStyle(
+                          fontFamily: 'NunitoSans',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      child: const Text(
+                        '{Test Page-Rishard}',
+                        style: TextStyle(color: Colors.teal),
                       ),
                     ),
                   ),
