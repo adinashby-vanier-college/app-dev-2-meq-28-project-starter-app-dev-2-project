@@ -1,4 +1,4 @@
-// Login screen of your app
+// Login screen of our app
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -66,7 +66,7 @@ class LoginScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: 'Pacifico',
-                    fontSize: 32,
+                    fontSize: 40,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1E3D36),
                   ),

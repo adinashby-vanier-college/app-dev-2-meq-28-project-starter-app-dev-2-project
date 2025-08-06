@@ -5,9 +5,9 @@ import 'screens/02_login_screen.dart';
 import 'screens/03_register_screen.dart';
 import 'screens/04_main_menu_screen.dart';
 
-// where your app starts running
+// where  app starts running
 void main() {
-  // runApp() tells Flutter to launch your app, starting with MyApp
+  // runApp() tells Flutter to launch  app, starting with MyApp
   runApp(const MyApp());
 }
 
@@ -19,10 +19,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // The name of your app
       title: 'Fridge & Pantry',
 
-      // The overall color theme of your app
+      // The overall color theme of  app
       theme: ThemeData(
         primarySwatch: Colors.teal,
       ),
