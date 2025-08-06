@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '08_magic_recommendations_screen.dart';
 import '09_nutripal_screen.dart';
 import '10_shop_around_screen.dart';
+import '04_main_menu_screen.dart';
+
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -156,6 +158,38 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+                // Test Main Menu Screen button (delete later)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      key: const Key('testMainMenuButton'),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const MainMenuScreen()),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.teal, width: 2),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        backgroundColor: Colors.white.withOpacity(0.85),
+                        textStyle: const TextStyle(
+                          fontFamily: 'NunitoSans',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      child: const Text(
+                        'Test Main Menu',
+                        style: TextStyle(color: Colors.teal),
+                      ),
+                    ),
+                  ),
+                ),
+
               ],
             ),
           ),

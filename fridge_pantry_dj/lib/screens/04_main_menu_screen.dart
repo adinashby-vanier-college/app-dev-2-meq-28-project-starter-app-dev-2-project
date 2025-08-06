@@ -1,0 +1,124 @@
+import 'package:flutter/material.dart';
+
+// This screen shows the main menu with buttons to different features
+class MainMenuScreen extends StatelessWidget {
+  const MainMenuScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // Background gradient colors (same as WelcomeScreen)
+    final bgGradient = const LinearGradient(
+      colors: [
+        Color(0xFFD1E8E5), // Light mint
+        Color(0xFFA7E9D0), // Soft green
+        Color(0xFF6BB3A8), // Deep teal
+      ],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+    );
+
+    // Style for all the menu buttons
+    final buttonStyle = ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF5EAAA8), // Teal color
+      foregroundColor: Colors.white, // Text color
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+      padding: const EdgeInsets.symmetric(vertical: 18),
+      textStyle: const TextStyle(
+        fontFamily: 'NunitoSans',
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+
+    // List of menu items with title, icon, and route
+    final menuItems = [
+      _MenuItem('Add Ingredients', Icons.add, '/add-ingredients'),
+      _MenuItem('Recipe Mixer', Icons.fastfood, '/recipe-mixer'),
+      _MenuItem('Magic Recommendations', Icons.auto_awesome, '/magic-recommendations'),
+      _MenuItem('NutriPal', Icons.local_hospital, '/nutripal'),
+      _MenuItem('Groceries Around You', Icons.store, '/shop-around'),
+      _MenuItem('Settings', Icons.settings, '/settings'),
+    ];
+
+    return Scaffold(
+      // Main layout of the screen
+      body: Container(
+        decoration: BoxDecoration(gradient: bgGradient), // Apply background
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Top bar with back button and title
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Back button
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Color(0xFF1E3D36)),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    // Title text
+                    const Text(
+                      'Main Menu',
+                      style: TextStyle(
+                        fontFamily: 'Pacifico',
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E3D36),
+                      ),
+                    ),
+                    // Spacer to balance layout
+                    const SizedBox(width: 48),
+                  ],
+                ),
+              ),
+
+              // List of menu buttons
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: menuItems.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, i) {
+                    final item = menuItems[i];
+                    return ElevatedButton(
+                      style: buttonStyle,
+                      onPressed: () => Navigator.pushNamed(context, item.route),
+                      child: Row(
+                        children: [
+                          Icon(item.icon, size: 28, color: Color(0xFF1E3D36)),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Text(
+                              item.title,
+                              style: const TextStyle(
+                                fontFamily: 'NunitoSans',
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1E3D36),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Helper class to store each menu item’s info
+class _MenuItem {
+  final String title;
+  final IconData icon;
+  final String route;
+
+  _MenuItem(this.title, this.icon, this.route);
+}
