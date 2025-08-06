@@ -32,9 +32,10 @@
             android:name="flutterEmbedding"
             android:value="2"
             />
+        <!-- Enter API key Here but remove before git commit -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-        <!-- Enter API key Here but remove before git commit -->
+
             android:value=""/>
     </application>
     <!-- Required to query activities that can process text, see:
