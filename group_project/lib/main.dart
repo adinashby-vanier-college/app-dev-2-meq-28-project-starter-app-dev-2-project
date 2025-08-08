@@ -1,8 +1,11 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'screens/chat_screen.dart';
 
-void main() {
-  runApp(SkillSwapApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Initialize Firebase
+  runApp(const SkillSwapApp());
 }
 
 class SkillSwapApp extends StatelessWidget {
@@ -15,6 +18,7 @@ class SkillSwapApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.indigo,
       ),
+        debugShowCheckedModeBanner: false,
       home: ChatScreen(), // Replace with splash/home screen later
     );
   }
