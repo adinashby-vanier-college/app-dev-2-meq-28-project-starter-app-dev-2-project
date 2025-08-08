@@ -4,6 +4,7 @@ import 'screens/01_welcome_screen.dart';
 import 'screens/02_login_screen.dart';
 import 'screens/03_register_screen.dart';
 import 'screens/04_main_menu_screen.dart';
+import 'screens/05_settings_screen.dart';
 
 // where  app starts running
 void main() {
@@ -22,20 +23,19 @@ class MyApp extends StatelessWidget {
       title: 'Fridge & Pantry',
 
       // The overall color theme of  app
-      theme: ThemeData(
-        primarySwatch: Colors.teal,
-      ),
+      theme: ThemeData(primarySwatch: Colors.teal),
 
       // first screen users will see when the app opens
       home: const WelcomeScreen(),
 
       // named routes for navigation
       routes: {
+        '/settings': (_) => const SettingsScreen(),
         // navigate to '/login' ,show the LoginScreen
         '/login': (_) => const LoginScreen(),
         // navigate to '/register', show the RegisterScreen
         '/register': (_) => const RegisterScreen(),
-        '/main-menu':  (_) => const MainMenuScreen(),
+        '/main-menu': (_) => const MainMenuScreen(),
       },
     );
   }
