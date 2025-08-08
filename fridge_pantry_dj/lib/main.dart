@@ -5,6 +5,7 @@ import 'screens/02_login_screen.dart';
 import 'screens/03_register_screen.dart';
 import 'screens/04_main_menu_screen.dart';
 import 'screens/05_settings_screen.dart';
+import 'screens/06_add_ingredients_screen.dart';
 
 // where  app starts running
 void main() {
@@ -30,12 +31,14 @@ class MyApp extends StatelessWidget {
 
       // named routes for navigation
       routes: {
-        '/settings': (_) => const SettingsScreen(),
         // navigate to '/login' ,show the LoginScreen
         '/login': (_) => const LoginScreen(),
         // navigate to '/register', show the RegisterScreen
         '/register': (_) => const RegisterScreen(),
         '/main-menu': (_) => const MainMenuScreen(),
+        //navigates to SettingsScreen()
+        '/settings': (_) => const SettingsScreen(),
+        '/add-ingredients': (_) => const AddIngredientsScreen(),
       },
     );
   }
