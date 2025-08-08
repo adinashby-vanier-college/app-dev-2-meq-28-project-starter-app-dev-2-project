@@ -1,6 +1,8 @@
-# Miscellaneous
+# Misc
 *.class
 *.log
+*.tmp
+*.lock
 *.pyc
 *.swp
 .DS_Store
@@ -12,49 +14,36 @@
 .swiftpm/
 migrate_working_dir/
 
-# IntelliJ related
+# IDEs
+.idea/
 *.iml
 *.ipr
 *.iws
-.idea/
+.vscode/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
+# Flutter/Dart/Pub
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
-/build/
+build/
 
-# Symbolication related
+# Symbolication & obfuscation
 app.*.symbols
-
-# Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
+# Android
+/android/.gradle/
+/android/app/build/
+/android/local.properties
 /android/app/debug
 /android/app/profile
 /android/app/release
-
-# Flutter/Dart/Pub related
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-build/
-.pub/
-
-# Environment-specific
-.env
+/android/app/google-services.json
 
 # iOS
 ios/Flutter/Flutter.framework
@@ -67,12 +56,6 @@ ios/Runner.xcworkspace/
 ios/Pods/
 ios/Podfile.lock
 ios/DerivedData/
-
-# Android
-android/.gradle/
-android/app/build/
-android/local.properties
-android/.idea/
 
 # macOS
 macos/Flutter/GeneratedPluginRegistrant.swift
@@ -95,13 +78,5 @@ linux/flutter/generated_plugin_registrant.cc
 linux/flutter/CMakeFiles/
 linux/cmake-build-*/
 
-# IDEs
-.idea/
-.vscode/
-*.iml
-
-# Other
-*.log
-*.tmp
-*.lock
-*.DS_Store
+# Environment-specific
+.env

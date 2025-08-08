@@ -1,5 +1,5 @@
 name: group_project
-description: "A new Flutter project."
+description: "SkillSwap - find and teach skills"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -46,8 +46,14 @@ dependencies:
   geolocator: ^14.0.2
   google_maps_flutter: ^2.6.0
 
+  # Timestamp
+  intl: ^0.18.1
+
   # Icons
   flutter_svg: ^2.0.10
+
+  # Loading spinner
+  flutter_spinkit: ^5.2.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
