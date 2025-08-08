@@ -260,31 +260,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         padding: const EdgeInsets.only(bottom: 16.0),
                         child: Row(
                           children: [
-                            // Cancel button
-                            Expanded(
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.grey[400],
-                                  foregroundColor: const Color(0xFF1E3D36),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                ),
-                                onPressed: _cancelChanges,
-                                child: const Text(
-                                  'Cancel',
-                                  style: TextStyle(
-                                    fontFamily: 'NunitoSans',
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
                             // Save button
                             Expanded(
                               child: ElevatedButton(
@@ -309,34 +284,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                               ),
                             ),
+                            const SizedBox(width: 16),
+                            // Cancel button
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.grey[400],
+                                  foregroundColor: const Color(0xFF1E3D36),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                ),
+                                onPressed: _cancelChanges,
+                                child: const Text(
+                                  'Cancel',
+                                  style: TextStyle(
+                                    fontFamily: 'NunitoSans',
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
-                        ),
-                      ),
-
-                      // Main Menu button at bottom
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 32.0),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF9BCF53),
-                              foregroundColor: const Color(0xFF1E3D36),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text(
-                              'Main Menu',
-                              style: TextStyle(
-                                fontFamily: 'NunitoSans',
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
                         ),
                       ),
                     ],

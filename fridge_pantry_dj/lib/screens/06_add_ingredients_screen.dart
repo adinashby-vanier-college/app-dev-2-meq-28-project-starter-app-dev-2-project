@@ -8,8 +8,9 @@ class AddIngredientsScreen extends StatefulWidget {
 }
 
 class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
-  final TextEditingController customIngredientController = TextEditingController();
-  
+  final TextEditingController customIngredientController =
+      TextEditingController();
+
   // List to store user's pantry items (dynamic - can be loaded from database)
   List<String> pantryItems = [
     'Beef',
@@ -62,7 +63,7 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
       });
       customIngredientController.clear();
       _saveUserData(); // Save changes
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('$ingredient added to your pantry!'),
@@ -90,14 +91,14 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
       }
     });
     _saveUserData(); // Save changes
-    
-    String message = pantryItems.contains(ingredient) 
+
+    String message = pantryItems.contains(ingredient)
         ? '$ingredient added to your pantry!'
         : '$ingredient removed from your pantry!';
-    Color backgroundColor = pantryItems.contains(ingredient) 
+    Color backgroundColor = pantryItems.contains(ingredient)
         ? const Color(0xFF5EAAA8)
         : Colors.red[400]!;
-        
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -112,7 +113,7 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
       pantryItems.remove(ingredient);
     });
     _saveUserData(); // Save changes
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('$ingredient removed from your pantry!'),
@@ -122,26 +123,11 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
     );
   }
 
-  void _removeCommonIngredient(String ingredient) {
-    setState(() {
-      commonIngredients.remove(ingredient);
-      // Also remove from pantry if it's there
-      pantryItems.remove(ingredient);
-    });
-    _saveUserData(); // Save changes
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$ingredient removed completely!'),
-        backgroundColor: Colors.red[400],
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
   void _editCommonIngredient(String oldIngredient) {
-    TextEditingController editController = TextEditingController(text: oldIngredient);
-    
+    TextEditingController editController = TextEditingController(
+      text: oldIngredient,
+    );
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -173,7 +159,8 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
             TextButton(
               onPressed: () {
                 String newIngredient = editController.text.trim();
-                if (newIngredient.isNotEmpty && newIngredient != oldIngredient) {
+                if (newIngredient.isNotEmpty &&
+                    newIngredient != oldIngredient) {
                   setState(() {
                     int index = commonIngredients.indexOf(oldIngredient);
                     if (index != -1) {
@@ -194,6 +181,29 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
             ),
           ],
         );
+      },
+    );
+  }
+
+  // Navigate to Recipe Mixer with pantry ingredients
+  void _searchRecipes() {
+    if (pantryItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please add some ingredients to your pantry first!'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Navigate to Recipe Mixer and pass the pantry ingredients
+    Navigator.pushNamed(
+      context,
+      '/recipe-mixer',
+      arguments: {
+        'pantryIngredients': List<String>.from(pantryItems), // Pass a copy
       },
     );
   }
@@ -271,7 +281,7 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                       // Custom ingredient input
                       Container(
                         decoration: BoxDecoration(
-                          color: const Color(0xFFB8D4E3).withOpacity(0.7),
+                          color: const Color(0xFFB8D4E3),
                           borderRadius: BorderRadius.circular(25),
                         ),
                         child: Row(
@@ -318,41 +328,48 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 2.2,
-                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 2.2,
+                            ),
                         itemCount: commonIngredients.length,
                         itemBuilder: (context, index) {
                           final ingredient = commonIngredients[index];
                           final isSelected = pantryItems.contains(ingredient);
-                          
+
                           return GestureDetector(
-                            onLongPress: () => _editCommonIngredient(ingredient),
+                            onLongPress: () =>
+                                _editCommonIngredient(ingredient),
                             child: SizedBox(
                               width: double.infinity,
                               height: double.infinity,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: isSelected 
-                                      ? const Color(0xFF5EAAA8) 
-                                      : const Color(0xFFB8D4E3).withOpacity(0.7),
+                                  backgroundColor: isSelected
+                                      ? const Color(0xFF5EAAA8)
+                                      : const Color(0xFFB8D4E3),
                                   foregroundColor: const Color(0xFF1E3D36),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   padding: const EdgeInsets.all(8),
                                 ),
-                                onPressed: () => _toggleCommonIngredient(ingredient),
+                                onPressed: () =>
+                                    _toggleCommonIngredient(ingredient),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
-                                      isSelected ? Icons.check_circle : Icons.circle_outlined,
+                                      isSelected
+                                          ? Icons.check_circle
+                                          : Icons.circle_outlined,
                                       size: 16,
-                                      color: isSelected ? Colors.white : const Color(0xFF1E3D36),
+                                      color: isSelected
+                                          ? Colors.white
+                                          : const Color(0xFF1E3D36),
                                     ),
                                     const SizedBox(width: 4),
                                     Expanded(
@@ -361,8 +378,12 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                                         style: TextStyle(
                                           fontFamily: 'NunitoSans',
                                           fontSize: 11,
-                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                                          color: isSelected ? Colors.white : const Color(0xFF1E3D36),
+                                          fontWeight: isSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.w600,
+                                          color: isSelected
+                                              ? Colors.white
+                                              : const Color(0xFF1E3D36),
                                         ),
                                         textAlign: TextAlign.center,
                                         overflow: TextOverflow.ellipsis,
@@ -378,14 +399,38 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                       const SizedBox(height: 32),
 
                       // Your Pantry section
-                      const Text(
-                        'Your Pantry',
-                        style: TextStyle(
-                          fontFamily: 'NunitoSans',
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E3D36),
-                        ),
+                      Row(
+                        children: [
+                          const Text(
+                            'Your Pantry',
+                            style: TextStyle(
+                              fontFamily: 'NunitoSans',
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1E3D36),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF5EAAA8),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '${pantryItems.length} items',
+                              style: const TextStyle(
+                                fontFamily: 'NunitoSans',
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16),
 
@@ -393,7 +438,7 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                       Container(
                         height: 200, // Fixed height for scrollable area
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: pantryItems.isEmpty
@@ -410,12 +455,13 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                               )
                             : GridView.builder(
                                 padding: const EdgeInsets.all(12),
-                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                  crossAxisSpacing: 8,
-                                  mainAxisSpacing: 8,
-                                  childAspectRatio: 2.2,
-                                ),
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3,
+                                      crossAxisSpacing: 8,
+                                      mainAxisSpacing: 8,
+                                      childAspectRatio: 2.2,
+                                    ),
                                 itemCount: pantryItems.length,
                                 itemBuilder: (context, index) {
                                   final ingredient = pantryItems[index];
@@ -427,7 +473,9 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: const Color(0xFF5EAAA8),
-                                            borderRadius: BorderRadius.circular(15),
+                                            borderRadius: BorderRadius.circular(
+                                              15,
+                                            ),
                                           ),
                                           child: Center(
                                             child: Text(
@@ -449,7 +497,8 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                                         top: -2,
                                         right: -2,
                                         child: GestureDetector(
-                                          onTap: () => _removeIngredient(ingredient),
+                                          onTap: () =>
+                                              _removeIngredient(ingredient),
                                           child: Container(
                                             width: 18,
                                             height: 18,
@@ -475,6 +524,42 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                       // Action buttons
                       Row(
                         children: [
+                          // Search Recipe button - UPDATED to use the new method
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF9BCF53),
+                                foregroundColor: const Color(0xFF1E3D36),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                              ),
+                              onPressed: _searchRecipes, // Updated method
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.search,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    'Search Recipe',
+                                    style: TextStyle(
+                                      fontFamily: 'NunitoSans',
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 16),
                           // Cancel button
                           Expanded(
                             child: ElevatedButton(
@@ -484,34 +569,13 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(25),
                                 ),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                               ),
                               onPressed: () => Navigator.pop(context),
                               child: const Text(
                                 'Cancel',
-                                style: TextStyle(
-                                  fontFamily: 'NunitoSans',
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          // Search Recipe button
-                          Expanded(
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF9BCF53),
-                                foregroundColor: const Color(0xFF1E3D36),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(25),
-                                ),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                              ),
-                              onPressed: () => Navigator.pushNamed(context, '/recipe-mixer'),
-                              child: const Text(
-                                'Search Recipe',
                                 style: TextStyle(
                                   fontFamily: 'NunitoSans',
                                   fontSize: 18,
