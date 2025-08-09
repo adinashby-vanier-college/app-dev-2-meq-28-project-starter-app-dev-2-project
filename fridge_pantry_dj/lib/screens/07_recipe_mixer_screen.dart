@@ -29,6 +29,8 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
   bool isLoading = false;
   bool hasReceivedIngredients = false;
 
+  //Gets ingredients passed from the previous screen via route arguments,
+  //sets up the user ingredients list, and triggers the initial recipe fetch.
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -44,7 +46,6 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
           hasReceivedIngredients = true;
         });
 
-        // Generate initial recipes based on received ingredients
         _fetchRecipesFromAPI();
 
         // Show success message
@@ -79,6 +80,8 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
     }
   }
 
+  //Makes HTTP requests to TheMealDB API to search for recipes based on the
+  //user's first 3 ingredients. Removes duplicate recipes by ID and limits results to 6 recipes.
   Future<void> _fetchRecipesFromAPI() async {
     setState(() {
       isLoading = true;
@@ -127,6 +130,7 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
     }
   }
 
+  //Fetches detailed ingredient list for a specific recipe by making another API call
   Future<List<String>> _getRecipeIngredients(String recipeId) async {
     try {
       final response = await http.get(
@@ -157,6 +161,7 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
     return [];
   }
 
+  //Compares recipe ingredients with user's pantry ingredients
   List<String> _getMatchingIngredients(List<String> recipeIngredients) {
     return recipeIngredients
         .where(
@@ -171,6 +176,7 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
         .toList();
   }
 
+  //Refreshes the recipe list when user clicks "Surprise me" button
   void _surpriseMe() async {
     setState(() {
       isLoading = true;
@@ -187,6 +193,7 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
     );
   }
 
+  //Re-fetches recipes when user clicks "Mix Recipes" button.
   void _searchRecipes() async {
     setState(() {
       isLoading = true;
@@ -517,7 +524,7 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
+                                    color: Colors.black,
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
