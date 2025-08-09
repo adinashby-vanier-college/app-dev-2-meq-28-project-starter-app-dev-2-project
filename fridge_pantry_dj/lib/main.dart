@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
         '/settings': (_) => const SettingsScreen(),
         '/add-ingredients': (_) => const AddIngredientsScreen(),
         '/recipe-mixer': (_) => const RecipeMixerScreen(),
-        '/recipe-viewer': (_) => const RecipeMixerScreen(),
+        '/recipe-viewer': (_) => const RecipeViewerScreen(),
       },
     );
   }
