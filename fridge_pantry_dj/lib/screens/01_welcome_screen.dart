@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '08_magic_recommendations_screen.dart';
-import '09_nutripal_screen.dart';
 import '10_shop_around_screen.dart';
 import '04_main_menu_screen.dart';
 

@@ -1,4 +1,78 @@
 import 'package:flutter/material.dart';
+//TODO  Import  API service
+
+//TODO need to delete?
+// For demo purposes, including the search functionality directly
+class ApiService {
+  static const List<String> _ingredientDatabase = [
+    // Proteins
+    'Chicken breast',
+    'Chicken thighs',
+    'Ground beef',
+    'Beef steak',
+    'Pork chops',
+    'Salmon', 'Tuna', 'Shrimp', 'Eggs', 'Tofu', 'Beans', 'Lentils', 'Chickpeas',
+
+    // Vegetables
+    'Tomatoes', 'Onions', 'Garlic', 'Bell peppers', 'Carrots', 'Broccoli',
+    'Spinach',
+    'Lettuce',
+    'Cucumbers',
+    'Mushrooms',
+    'Potatoes',
+    'Sweet potatoes',
+    'Zucchini', 'Eggplant', 'Celery', 'Cabbage', 'Cauliflower', 'Green beans',
+
+    // Grains & Starches
+    'Rice', 'Pasta', 'Bread', 'Quinoa', 'Oats', 'Flour', 'Noodles', 'Couscous',
+
+    // Dairy & Alternatives
+    'Milk',
+    'Cheese',
+    'Yogurt',
+    'Butter',
+    'Cream',
+    'Almond milk',
+    'Coconut milk',
+
+    // Herbs & Spices
+    'Basil', 'Oregano', 'Thyme', 'Rosemary', 'Parsley', 'Cilantro', 'Salt',
+    'Black pepper', 'Paprika', 'Cumin', 'Garlic powder', 'Onion powder',
+
+    // Pantry Staples
+    'Olive oil', 'Vegetable oil', 'Vinegar', 'Soy sauce', 'Honey', 'Sugar',
+    'Baking powder', 'Vanilla extract', 'Canned tomatoes', 'Coconut oil',
+
+    // Fruits
+    'Apples', 'Bananas', 'Oranges', 'Lemons', 'Limes', 'Berries', 'Avocados',
+
+    // Frozen Items
+    'Frozen peas', 'Frozen corn', 'Frozen berries', 'Frozen vegetables',
+  ];
+
+  static List<String> searchIngredients(String query) {
+    if (query.isEmpty) return [];
+
+    final lowercaseQuery = query.toLowerCase();
+
+    List<String> exactMatches = _ingredientDatabase
+        .where(
+          (ingredient) => ingredient.toLowerCase().startsWith(lowercaseQuery),
+        )
+        .toList();
+
+    List<String> partialMatches = _ingredientDatabase
+        .where(
+          (ingredient) =>
+              ingredient.toLowerCase().contains(lowercaseQuery) &&
+              !ingredient.toLowerCase().startsWith(lowercaseQuery),
+        )
+        .toList();
+
+    List<String> allMatches = [...exactMatches, ...partialMatches];
+    return allMatches.take(8).toList();
+  }
+}
 
 class AddIngredientsScreen extends StatefulWidget {
   const AddIngredientsScreen({super.key});
@@ -282,7 +356,7 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                       Container(
                         decoration: BoxDecoration(
                           color: const Color(0xFFB8D4E3),
-                          borderRadius: BorderRadius.circular(25),
+                          borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           children: [
@@ -291,7 +365,7 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                                 controller: customIngredientController,
                                 style: const TextStyle(
                                   fontFamily: 'NunitoSans',
-                                  fontSize: 16,
+                                  fontSize: 15,
                                   color: Color(0xFF1E3D36),
                                 ),
                                 decoration: const InputDecoration(
@@ -301,7 +375,7 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                                   ),
                                   border: InputBorder.none,
                                   contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 20,
+                                    horizontal: 16,
                                     vertical: 16,
                                   ),
                                 ),
@@ -315,7 +389,7 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                                 icon: const Icon(
                                   Icons.add,
                                   color: Color(0xFF1E3D36),
-                                  size: 28,
+                                  size: 5,
                                 ),
                               ),
                             ),
@@ -541,10 +615,7 @@ class _AddIngredientsScreenState extends State<AddIngredientsScreen> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(
-                                    Icons.search,
-                                    size: 20,
-                                  ),
+                                  const Icon(Icons.search, size: 20),
                                   const SizedBox(width: 8),
                                   const Text(
                                     'Search Recipe',

@@ -16,50 +16,139 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
     'Dairy Free': false,
   };
 
-  // Sample user ingredients (would come from previous screen or database)
-  List<String> userIngredients = [
-    'Pasta',
-    'Tomato',
-    'Garlic',
-    'Cheese',
-    'Basil',
-    'Chicken',
-    'Rice',
-    'Eggs',
-  ];
-
+  // User ingredients from Add Ingredients page
+  List<String> userIngredients = [];
+  
   // Sample recipe results
   List<Recipe> recipes = [];
   bool isLoading = false;
+  bool hasReceivedIngredients = false;
 
   @override
-  void initState() {
-    super.initState();
-    _generateInitialRecipes();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Get ingredients passed from Add Ingredients screen
+    if (!hasReceivedIngredients) {
+      final arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      
+      if (arguments != null && arguments['pantryIngredients'] != null) {
+        setState(() {
+          userIngredients = List<String>.from(arguments['pantryIngredients']);
+          hasReceivedIngredients = true;
+        });
+        
+        // Generate initial recipes based on received ingredients
+        _generateInitialRecipes();
+        
+        // Show success message
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Found ${userIngredients.length} ingredients in your pantry!'),
+              backgroundColor: const Color(0xFF5EAAA8),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        });
+      } else {
+        // Fallback to default ingredients if no data is passed
+        setState(() {
+          userIngredients = [
+            'Pasta',
+            'Tomato',
+            'Garlic',
+            'Cheese',
+            'Basil',
+            'Chicken',
+            'Rice',
+            'Eggs',
+          ];
+          hasReceivedIngredients = true;
+        });
+        _generateInitialRecipes();
+      }
+    }
   }
 
   void _generateInitialRecipes() {
-    // Sample recipes based on user ingredients
-    recipes = [
-      Recipe(
+    // Generate recipes based on actual user ingredients
+    List<Recipe> initialRecipes = [];
+    
+    // Recipe matching logic based on user's ingredients
+    if (_hasIngredients(['Pasta', 'Tomato'])) {
+      initialRecipes.add(Recipe(
         name: 'Tomato Pasta',
-        matchingIngredients: ['Pasta', 'Tomato', 'Garlic', 'Cheese', 'Basil'],
+        matchingIngredients: _getMatchingIngredients(['Pasta', 'Tomato', 'Garlic', 'Cheese', 'Basil']),
         cookingTime: '20 mins',
         difficulty: 'Easy',
-      ),
-      Recipe(
+      ));
+    }
+    
+    if (_hasIngredients(['Chicken', 'Rice'])) {
+      initialRecipes.add(Recipe(
         name: 'Chicken Fried Rice',
-        matchingIngredients: ['Chicken', 'Rice', 'Eggs', 'Garlic'],
+        matchingIngredients: _getMatchingIngredients(['Chicken', 'Rice', 'Eggs', 'Garlic']),
         cookingTime: '25 mins',
         difficulty: 'Medium',
-      ),
-      Recipe(
+      ));
+    }
+    
+    if (_hasIngredients(['Eggs', 'Tomato'])) {
+      initialRecipes.add(Recipe(
         name: 'Basil Tomato Eggs',
-        matchingIngredients: ['Eggs', 'Tomato', 'Basil', 'Cheese'],
+        matchingIngredients: _getMatchingIngredients(['Eggs', 'Tomato', 'Basil', 'Cheese']),
         cookingTime: '15 mins',
         difficulty: 'Easy',
-      ),
-    ];
+      ));
+    }
+    
+    if (_hasIngredients(['Beef'])) {
+      initialRecipes.add(Recipe(
+        name: 'Beef Stir Fry',
+        matchingIngredients: _getMatchingIngredients(['Beef', 'Carrot', 'Garlic']),
+        cookingTime: '30 mins',
+        difficulty: 'Medium',
+      ));
+    }
+    
+    if (_hasIngredients(['Milk', 'Eggs'])) {
+      initialRecipes.add(Recipe(
+        name: 'Creamy Scrambled Eggs',
+        matchingIngredients: _getMatchingIngredients(['Eggs', 'Milk', 'Cheese']),
+        cookingTime: '10 mins',
+        difficulty: 'Easy',
+      ));
+    }
+    
+    // If no specific recipes match, create some generic ones
+    if (initialRecipes.isEmpty && userIngredients.isNotEmpty) {
+      initialRecipes.add(Recipe(
+        name: 'Creative Kitchen Mix',
+        matchingIngredients: userIngredients.take(4).toList(),
+        cookingTime: '25 mins',
+        difficulty: 'Medium',
+      ));
+    }
+    
+    setState(() {
+      recipes = initialRecipes;
+    });
+  }
+
+  // Helper method to check if user has certain ingredients
+  bool _hasIngredients(List<String> requiredIngredients) {
+    return requiredIngredients.any((ingredient) => 
+        userIngredients.any((userIngredient) => 
+            userIngredient.toLowerCase().contains(ingredient.toLowerCase()) ||
+            ingredient.toLowerCase().contains(userIngredient.toLowerCase())));
+  }
+  
+  // Helper method to get matching ingredients from a recipe
+  List<String> _getMatchingIngredients(List<String> recipeIngredients) {
+    return recipeIngredients.where((ingredient) =>
+        userIngredients.any((userIngredient) =>
+            userIngredient.toLowerCase() == ingredient.toLowerCase())).toList();
   }
 
   void _surpriseMe() async {
@@ -70,23 +159,40 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
     // Simulate API call delay
     await Future.delayed(const Duration(seconds: 2));
 
-    // Generate surprise recipes
-    List<Recipe> surpriseRecipes = [
-      Recipe(
+    // Generate surprise recipes using user's actual ingredients
+    List<Recipe> surpriseRecipes = [];
+    
+    if (userIngredients.length >= 3) {
+      // Create creative combinations from user's ingredients
+      List<String> shuffledIngredients = List.from(userIngredients)..shuffle();
+      
+      surpriseRecipes.add(Recipe(
         name: 'DJ\'s Special Fusion Bowl',
-        matchingIngredients: ['Rice', 'Eggs', 'Cheese', 'Basil'],
+        matchingIngredients: shuffledIngredients.take(4).toList(),
         cookingTime: '30 mins',
         difficulty: 'Medium',
         isSurprise: true,
-      ),
-      Recipe(
-        name: 'Midnight Kitchen Mix',
-        matchingIngredients: ['Pasta', 'Chicken', 'Garlic', 'Tomato'],
-        cookingTime: '35 mins',
-        difficulty: 'Hard',
+      ));
+      
+      if (userIngredients.length >= 4) {
+        surpriseRecipes.add(Recipe(
+          name: 'Midnight Kitchen Mix',
+          matchingIngredients: shuffledIngredients.skip(1).take(4).toList(),
+          cookingTime: '35 mins',
+          difficulty: 'Hard',
+          isSurprise: true,
+        ));
+      }
+    } else {
+      // Fallback for fewer ingredients
+      surpriseRecipes.add(Recipe(
+        name: 'Simple Surprise Dish',
+        matchingIngredients: userIngredients,
+        cookingTime: '20 mins',
+        difficulty: 'Easy',
         isSurprise: true,
-      ),
-    ];
+      ));
+    }
 
     setState(() {
       recipes = surpriseRecipes;
@@ -118,43 +224,84 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
   }
 
   void _generateFilteredRecipes() {
-    // Filter recipes based on dietary preferences
-    List<Recipe> filteredRecipes = [
-      Recipe(
+    List<Recipe> filteredRecipes = [];
+    
+    // Start with all possible recipes based on ingredients
+    if (_hasIngredients(['Pasta', 'Tomato'])) {
+      filteredRecipes.add(Recipe(
         name: 'Tomato Pasta',
-        matchingIngredients: ['Pasta', 'Tomato', 'Garlic', 'Cheese', 'Basil'],
+        matchingIngredients: _getMatchingIngredients(['Pasta', 'Tomato', 'Garlic', 'Cheese', 'Basil']),
         cookingTime: '20 mins',
         difficulty: 'Easy',
-      ),
-      Recipe(
+      ));
+    }
+    
+    if (_hasIngredients(['Rice'])) {
+      filteredRecipes.add(Recipe(
         name: 'Garlic Rice Bowl',
-        matchingIngredients: ['Rice', 'Garlic', 'Basil'],
+        matchingIngredients: _getMatchingIngredients(['Rice', 'Garlic', 'Basil']),
         cookingTime: '18 mins',
         difficulty: 'Easy',
-      ),
-    ];
+      ));
+    }
+    
+    if (_hasIngredients(['Chicken'])) {
+      filteredRecipes.add(Recipe(
+        name: 'Herb Chicken',
+        matchingIngredients: _getMatchingIngredients(['Chicken', 'Garlic', 'Basil']),
+        cookingTime: '35 mins',
+        difficulty: 'Medium',
+      ));
+    }
 
     // Apply dietary filters
     if (dietaryPreferences['Vegan']!) {
-      filteredRecipes = filteredRecipes
-          .where(
-            (recipe) =>
-                !recipe.matchingIngredients.contains('Cheese') &&
-                !recipe.matchingIngredients.contains('Chicken') &&
-                !recipe.matchingIngredients.contains('Eggs'),
-          )
-          .toList();
+      filteredRecipes = filteredRecipes.where((recipe) => 
+        !recipe.matchingIngredients.any((ingredient) =>
+          ['Cheese', 'Chicken', 'Eggs', 'Milk', 'Beef'].contains(ingredient))
+      ).toList();
     }
 
     if (dietaryPreferences['Vegetarian']!) {
-      filteredRecipes = filteredRecipes
-          .where((recipe) => !recipe.matchingIngredients.contains('Chicken'))
-          .toList();
+      filteredRecipes = filteredRecipes.where((recipe) => 
+        !recipe.matchingIngredients.any((ingredient) =>
+          ['Chicken', 'Beef', 'Lamb'].contains(ingredient))
+      ).toList();
+    }
+    
+    if (dietaryPreferences['Dairy Free']!) {
+      filteredRecipes = filteredRecipes.where((recipe) => 
+        !recipe.matchingIngredients.any((ingredient) =>
+          ['Cheese', 'Milk'].contains(ingredient))
+      ).toList();
+    }
+    
+    if (dietaryPreferences['Gluten Free']!) {
+      filteredRecipes = filteredRecipes.where((recipe) => 
+        !recipe.matchingIngredients.any((ingredient) =>
+          ['Pasta', 'Bread'].contains(ingredient))
+      ).toList();
     }
 
     setState(() {
       recipes = filteredRecipes;
     });
+    
+    // Show message about applied filters
+    List<String> activeFilters = dietaryPreferences.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toList();
+    
+    if (activeFilters.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Applied filters: ${activeFilters.join(", ")}'),
+          backgroundColor: const Color(0xFF5EAAA8),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
@@ -210,6 +357,91 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Your Pantry Ingredients Section
+                      Row(
+                        children: [
+                          const Text(
+                            'Your Pantry Ingredients',
+                            style: TextStyle(
+                              fontFamily: 'NunitoSans',
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1E3D36),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF9BCF53),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '${userIngredients.length}',
+                              style: const TextStyle(
+                                fontFamily: 'NunitoSans',
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1E3D36),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Display user ingredients
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0x40FFFFFF),
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(
+                            color: const Color(0xFF5EAAA8),
+                            width: 2,
+                          ),
+                        ),
+                        child: userIngredients.isEmpty
+                            ? const Text(
+                                'No ingredients received. Please add ingredients first.',
+                                style: TextStyle(
+                                  fontFamily: 'NunitoSans',
+                                  fontSize: 14,
+                                  color: Color(0xFF666666),
+                                ),
+                              )
+                            : Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: userIngredients.map((ingredient) {
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF5EAAA8),
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: Text(
+                                      ingredient,
+                                      style: const TextStyle(
+                                        fontFamily: 'NunitoSans',
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                      ),
+                      const SizedBox(height: 24),
+
                       // Dietary Requirements Section
                       const Text(
                         'Dietary Requirements',
@@ -304,7 +536,7 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
 
                       // Search button
                       SizedBox(
@@ -346,6 +578,38 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
                                   fontFamily: 'NunitoSans',
                                   fontSize: 16,
                                   color: Color(0xFF1E3D36),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else if (recipes.isEmpty)
+                        Center(
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.search_off,
+                                size: 64,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No recipes found with your current ingredients and filters.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'NunitoSans',
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Try removing some dietary filters or adding more ingredients!',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'NunitoSans',
+                                  fontSize: 14,
+                                  color: Colors.grey[500],
                                 ),
                               ),
                             ],
@@ -429,6 +693,26 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
                                             color: Colors.grey[600],
                                           ),
                                         ),
+                                        const Spacer(),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF9BCF53),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            '${recipe.matchingIngredients.length}/${recipe.matchingIngredients.length} match',
+                                            style: const TextStyle(
+                                              fontFamily: 'NunitoSans',
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF1E3D36),
+                                            ),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                     const SizedBox(height: 12),
@@ -437,33 +721,41 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
                                     Wrap(
                                       spacing: 8,
                                       runSpacing: 8,
-                                      children: recipe.matchingIngredients.map((
-                                        ingredient,
-                                      ) {
+                                      children: recipe.matchingIngredients.map((ingredient) {
+                                        bool userHasIngredient = userIngredients.any(
+                                          (userIngredient) => userIngredient.toLowerCase() == ingredient.toLowerCase()
+                                        );
                                         return Container(
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 12,
                                             vertical: 6,
                                           ),
                                           decoration: BoxDecoration(
-                                            color:
-                                                userIngredients.contains(
-                                                  ingredient,
-                                                )
+                                            color: userHasIngredient
                                                 ? const Color(0xFF9BCF53)
                                                 : const Color(0xFFB8D4E3),
-                                            borderRadius: BorderRadius.circular(
-                                              15,
-                                            ),
+                                            borderRadius: BorderRadius.circular(15),
                                           ),
-                                          child: Text(
-                                            ingredient,
-                                            style: const TextStyle(
-                                              fontFamily: 'NunitoSans',
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                              color: Color(0xFF1E3D36),
-                                            ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              if (userHasIngredient)
+                                                const Icon(
+                                                  Icons.check,
+                                                  size: 14,
+                                                  color: Color(0xFF1E3D36),
+                                                ),
+                                              if (userHasIngredient) const SizedBox(width: 4),
+                                              Text(
+                                                ingredient,
+                                                style: const TextStyle(
+                                                  fontFamily: 'NunitoSans',
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Color(0xFF1E3D36),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         );
                                       }).toList(),
@@ -475,30 +767,18 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
                                       width: double.infinity,
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(
-                                            0xFF5EAAA8,
-                                          ),
+                                          backgroundColor: const Color(0xFF5EAAA8),
                                           foregroundColor: Colors.white,
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              20,
-                                            ),
+                                            borderRadius: BorderRadius.circular(20),
                                           ),
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 12,
-                                          ),
+                                          padding: const EdgeInsets.symmetric(vertical: 12),
                                         ),
                                         onPressed: () {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
+                                          ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
-                                              content: Text(
-                                                'Opening ${recipe.name} recipe...',
-                                              ),
-                                              backgroundColor: const Color(
-                                                0xFF5EAAA8,
-                                              ),
+                                              content: Text('Opening ${recipe.name} recipe...'),
+                                              backgroundColor: const Color(0xFF5EAAA8),
                                             ),
                                           );
                                         },
@@ -521,29 +801,53 @@ class _RecipeMixerScreenState extends State<RecipeMixerScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Main Menu button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF9BCF53),
-                            foregroundColor: const Color(0xFF1E3D36),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
+                      // Navigation buttons
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFB8D4E3),
+                                foregroundColor: const Color(0xFF1E3D36),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                              ),
+                              onPressed: () => Navigator.pushNamed(context, '/add-ingredients'),
+                              child: const Text(
+                                'Add Ingredients',
+                                style: TextStyle(
+                                  fontFamily: 'NunitoSans',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
-                          onPressed: () =>
-                              Navigator.pushNamed(context, '/main-menu'),
-                          child: const Text(
-                            'Main Menu',
-                            style: TextStyle(
-                              fontFamily: 'NunitoSans',
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF9BCF53),
+                                foregroundColor: const Color(0xFF1E3D36),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                              ),
+                              onPressed: () => Navigator.pushNamed(context, '/main-menu'),
+                              child: const Text(
+                                'Main Menu',
+                                style: TextStyle(
+                                  fontFamily: 'NunitoSans',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                       const SizedBox(height: 32),
                     ],
