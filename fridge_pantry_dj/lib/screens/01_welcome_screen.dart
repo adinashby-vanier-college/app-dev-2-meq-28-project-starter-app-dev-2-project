@@ -131,7 +131,7 @@ class WelcomeScreen extends StatelessWidget {
                   child: SizedBox(
                     width: double.infinity,
                     child: OutlinedButton(
-                      key: const Key('testMainMenuButton'),
+                      key: const Key('/main-menu'),
                       onPressed: () {
                         Navigator.push(
                           context,

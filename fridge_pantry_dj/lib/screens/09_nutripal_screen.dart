@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class ChatMessage {
   final String text;
@@ -48,22 +50,68 @@ class _NutripalScreenState extends State<NutripalScreen> {
     _messageController.clear();
     _scrollToBottom();
 
-    await Future.delayed(const Duration(seconds: 2));
-
-    setState(() {
-      _messages.add(ChatMessage(
-        text: _getAIResponse(userMessage),
-        isUser: false,
-        timestamp: DateTime.now(),
-      ));
-      _isLoading = false;
-    });
+    try {
+      final aiResponse = await _getAIResponse(userMessage);
+      
+      setState(() {
+        _messages.add(ChatMessage(
+          text: aiResponse,
+          isUser: false,
+          timestamp: DateTime.now(),
+        ));
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _messages.add(ChatMessage(
+          text: 'Sorry, there was an error processing your request. Please try again.',
+          isUser: false,
+          timestamp: DateTime.now(),
+        ));
+        _isLoading = false;
+      });
+    }
 
     _scrollToBottom();
   }
 
-  String _getAIResponse(String userMessage) {
-    return "";
+  Future<String> _getAIResponse(String userMessage) async {
+    try {
+      //add env file and hide the api later
+      const String apiKey = '';
+      const String apiUrl = 'https://api.deepseek.com/chat/completions';
+      
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+        },
+        body: jsonEncode({
+          'model': 'deepseek-chat',
+          'messages': [
+            {
+              'role': 'system',
+              'content': 'You Nutritionist Expert chat bot. You give precise short Nutritionist advice and replies . Only use grams and never oz. Only provide short replies as output.'
+            },
+            {
+              'role': 'user',
+              'content': userMessage
+            }
+          ],
+          'stream': false,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        return data['choices'][0]['message']['content'] ?? 'Sorry, I could not process your request.';
+      } else {
+        return 'Sorry, there was an error connecting to NutriPal AI. Please try again.';
+      }
+    } catch (e) {
+      return 'Sorry, there was an error processing your request. Please check your internet connection and try again.';
+    }
   }
 
   void _scrollToBottom() {
@@ -123,9 +171,64 @@ class _NutripalScreenState extends State<NutripalScreen> {
                 ),
               ),
               
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12.withOpacity(0.15),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Image.asset('assets/nutri.png'),
+                ),
+              ),
+              
+              const SizedBox(height: 12),
+              
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.teal.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    'Meet NutriPal - Your personal AI Nutritionist',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'NunitoSans',
+                      fontSize: 23,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF364958),
+                    ),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 20),
+              
               Expanded(
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                  height: 400,
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.9),
                     borderRadius: BorderRadius.circular(20),
@@ -233,7 +336,7 @@ class _NutripalScreenState extends State<NutripalScreen> {
             child: TextField(
               controller: _messageController,
               decoration: InputDecoration(
-                hintText: 'Ask NutriPal about nutrition...',
+                hintText: 'Ask about nutrition...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25),
                   borderSide: const BorderSide(color: Color(0xFF6BB3A8)),
