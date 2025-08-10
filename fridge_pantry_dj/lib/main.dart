@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fridge_pantry_dj/screens/08_magic_recommendations_screen.dart';
+import 'package:fridge_pantry_dj/screens/09_nutripal_screen.dart';
+import 'package:fridge_pantry_dj/screens/10_shop_around_screen.dart';
 // These import your custom screens
 import 'screens/01_welcome_screen.dart';
 import 'screens/02_login_screen.dart';
@@ -43,6 +46,10 @@ class MyApp extends StatelessWidget {
         '/add-ingredients': (_) => const AddIngredientsScreen(),
         '/recipe-mixer': (_) => const RecipeMixerScreen(),
         '/recipe-viewer': (_) => const RecipeViewerScreen(),
+        '/nutripal': (_) => const NutripalScreen(),
+        '/shop-around': (_) => const ShopAroundScreen(),
+        '/magic-recommendations': (_) => const MagicRecommendationsScreen(),
+
       },
     );
   }
