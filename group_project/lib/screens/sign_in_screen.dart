@@ -68,6 +68,9 @@ class _SignInScreenState extends State<SignInScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Signed in successfully")),
                     );
+
+                    Navigator.pushReplacementNamed(context, '/home');
+
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(e.toString())),
@@ -75,6 +78,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   }
                 },
               ),
+
               const SizedBox(height: 16),
               const Text("or use one of your social profiles"),
               const SizedBox(height: 16),
