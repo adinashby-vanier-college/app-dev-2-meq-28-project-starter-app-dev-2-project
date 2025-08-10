@@ -65,4 +65,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'skillswap-1e2bb.firebasestorage.app',
     iosBundleId: 'com.example.groupProject',
   );
+
 }

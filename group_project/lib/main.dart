@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'screens/chat_screen.dart';
+import 'screens/sign_in_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +19,7 @@ class SkillSwapApp extends StatelessWidget {
         primarySwatch: Colors.indigo,
       ),
         debugShowCheckedModeBanner: false,
-      home: ChatScreen(), // Replace with splash/home screen later
+      home: const SignInScreen(), // Replace with splash/home screen later
     );
   }
 }
