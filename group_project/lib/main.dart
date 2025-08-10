@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'screens/chat_screen.dart';
+import 'package:group_project/screens/conversations_screen.dart';
+import 'package:group_project/screens/archived_chats_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,8 +19,12 @@ class SkillSwapApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.indigo,
       ),
-        debugShowCheckedModeBanner: false,
-      home: ChatScreen(), // Replace with splash/home screen later
+      debugShowCheckedModeBanner: false,
+      home: const ConversationsScreen(), // Start screen (replace as required)
+      routes: {
+        '/archivedChats': (context) => const ArchivedChatsScreen(),
+        // Add other routes here if needed
+      },
     );
   }
 }

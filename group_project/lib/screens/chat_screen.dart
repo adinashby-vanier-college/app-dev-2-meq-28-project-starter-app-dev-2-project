@@ -6,7 +6,14 @@ import '../models/message.dart';
 import '../services/chat_service.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final String conversationId;
+  final bool isArchived;
+
+  const ChatScreen({
+    super.key,
+    required this.conversationId,
+    this.isArchived = false,
+  });
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -31,12 +38,13 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     });
 
-    // Simulate loading or any initial setup
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() => _isLoading = false);
       }
     });
+
+    _chatService.markMessagesRead(widget.conversationId);
   }
 
   @override
@@ -56,7 +64,7 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     try {
-      await _chatService.sendMessage(mockChatPartnerId, text);
+      await _chatService.sendMessage(widget.conversationId, text);
       _scrollToBottom();
     } catch (e) {
       if (!mounted) return;
@@ -70,7 +78,7 @@ class _ChatScreenState extends State<ChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
-          0.0, // because reverse = true
+          _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
@@ -82,7 +90,7 @@ class _ChatScreenState extends State<ChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
+          0.0,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
@@ -90,8 +98,31 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  Future<void> _toggleArchiveStatus() async {
+    try {
+      final newArchiveState = !widget.isArchived;
+      await _chatService.archiveConversation(widget.conversationId, archive: newArchiveState);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(newArchiveState ? 'Conversation archived' : 'Conversation unarchived'),
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update archive status: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isArchived = widget.isArchived;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('SkillSwap Chat'),
@@ -106,6 +137,11 @@ class _ChatScreenState extends State<ChatScreen> {
             tooltip: 'Scroll to bottom',
             onPressed: _scrollToBottom,
           ),
+          IconButton(
+            icon: Icon(isArchived ? Icons.unarchive : Icons.archive),
+            tooltip: isArchived ? 'Unarchive Chat' : 'Archive Chat',
+            onPressed: _toggleArchiveStatus,
+          ),
         ],
       ),
       body: _isLoading
@@ -114,7 +150,7 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
             child: StreamBuilder<List<Message>>(
-              stream: _chatService.getMessages(mockChatPartnerId),
+              stream: _chatService.getMessages(widget.conversationId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const LoadingSpinner();
@@ -133,14 +169,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 final messages = snapshot.data!;
 
-                // Auto-scroll on new message
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   _scrollToBottom();
                 });
 
                 return ListView.builder(
                   controller: _scrollController,
-                  reverse: true,
                   itemCount: messages.length,
                   itemBuilder: (ctx, index) {
                     final msg = messages[index];
@@ -149,7 +183,19 @@ class _ChatScreenState extends State<ChatScreen> {
                       key: ValueKey(msg.id),
                       message: msg.text,
                       isMe: isMe,
-                      timestamp: msg.timestamp, // Pass timestamp here
+                      timestamp: msg.timestamp,
+                      onDelete: () async {
+                        try {
+                          await _chatService.deleteMessage(widget.conversationId, msg.id);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Message deleted')),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to delete message: $e')),
+                          );
+                        }
+                      },
                     );
                   },
                 );
