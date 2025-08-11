@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fridge_pantry_dj/screens/08_magic_recommendations_screen.dart';
 import 'package:fridge_pantry_dj/screens/09_nutripal_screen.dart';
 import 'package:fridge_pantry_dj/screens/10_shop_around_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 // These import your custom screens
 import 'screens/01_welcome_screen.dart';
 import 'screens/02_login_screen.dart';
@@ -13,7 +15,10 @@ import 'screens/07_recipe_mixer_screen.dart';
 import 'screens/07.5_recipe_viewer_screen.dart';
 
 // where  app starts running
-void main() {
+void main() async {
+//Initialize flutter and Initialize Firebase
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   // runApp() tells Flutter to launch  app, starting with MyApp
   runApp(const MyApp());
 }
