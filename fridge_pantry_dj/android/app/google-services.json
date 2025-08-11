@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "588024868184",
+    "project_id": "fridge-pantry-dj-6aa3f",
+    "storage_bucket": "fridge-pantry-dj-6aa3f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:588024868184:android:6c4576c8fb626a5af4492d",
+        "android_client_info": {
+          "package_name": "com.example.fridge_pantry_dj"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHdNGJQpCK_1cvyUpF-UF_VYXpe9VUQI0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
