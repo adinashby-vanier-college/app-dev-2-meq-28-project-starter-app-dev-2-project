@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // This screen shows the main menu with buttons to different features
 class MainMenuScreen extends StatelessWidget {
@@ -7,6 +8,9 @@ class MainMenuScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Background gradient colors (same as WelcomeScreen)
+    final user = FirebaseAuth.instance.currentUser;
+
+    // Background gradient colors
     final bgGradient = const LinearGradient(
       colors: [
         Color(0xFFD1E8E5), // Light mint
@@ -40,6 +44,11 @@ class MainMenuScreen extends StatelessWidget {
       _MenuItem('Settings', Icons.settings, '/settings'),
     ];
 
+    Future<void> _signOut() async {
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushReplacementNamed(context, '/login');
+    }
+
     return Scaffold(
       // Main layout of the screen
       body: Container(
@@ -47,7 +56,7 @@ class MainMenuScreen extends StatelessWidget {
         child: SafeArea(
           child: Column(
             children: [
-              // Top bar with back button and title
+              // Top bar with logout button and title
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
@@ -55,8 +64,9 @@ class MainMenuScreen extends StatelessWidget {
                   children: [
                     // Back button
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Color(0xFF1E3D36)),
-                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.logout, color: Color(0xFF1E3D36)),
+                      tooltip: 'Sign out',
+                      onPressed: _signOut,
                     ),
                     // Title text
                     const Text(
@@ -68,11 +78,30 @@ class MainMenuScreen extends StatelessWidget {
                         color: Color(0xFF1E3D36),
                       ),
                     ),
-                    // Spacer to balance layout
                     const SizedBox(width: 48),
                   ],
                 ),
               ),
+
+              // Personalized welcome message
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    user?.displayName != null && user!.displayName!.isNotEmpty
+                        ? 'Hey, ${user.displayName}!'
+                        : 'Hey there!',
+                    style: const TextStyle(
+                      fontFamily: 'NunitoSans',
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1E3D36),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
 
               // List of menu buttons
               Expanded(
@@ -87,7 +116,7 @@ class MainMenuScreen extends StatelessWidget {
                       onPressed: () => Navigator.pushNamed(context, item.route),
                       child: Row(
                         children: [
-                          Icon(item.icon, size: 28, color: Color(0xFF1E3D36)),
+                          Icon(item.icon, size: 28, color: const Color(0xFF1E3D36)),
                           const SizedBox(width: 16),
                           Expanded(
                             child: Text(

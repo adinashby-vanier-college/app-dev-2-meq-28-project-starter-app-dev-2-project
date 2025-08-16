@@ -1,8 +1,72 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Screen for creating a new account
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _register() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill out all fields')),
+      );
+      return;
+    }
+    setState(() => _isLoading = true);
+    try {
+      // Create the user account
+      UserCredential userCredential =
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Store the user's display name
+      await userCredential.user?.updateDisplayName(name);
+      await userCredential.user?.reload();
+
+      if (mounted) {
+        // Navigate to the main menu upon successful registration
+        Navigator.pushReplacementNamed(context, '/main-menu');
+      }
+    } on FirebaseAuthException catch (e) {
+      // Handle common errors
+      String message;
+      if (e.code == 'weak-password') {
+        message = 'The password provided is too weak.';
+      } else if (e.code == 'email-already-in-use') {
+        message = 'An account already exists for that email.';
+      } else {
+        message = 'Failed to sign up: ${e.message ?? e.code}';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +85,6 @@ class RegisterScreen extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
             child: Column(
@@ -103,6 +166,7 @@ class RegisterScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 TextField(
+                  controller: _nameController,
                   decoration: InputDecoration(
                     hintText: 'Hello World',
                     filled: true,
@@ -128,6 +192,7 @@ class RegisterScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 TextField(
+                  controller: _emailController,
                   decoration: InputDecoration(
                     hintText: 'hello@world.com',
                     filled: true,
@@ -153,6 +218,7 @@ class RegisterScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 TextField(
+                  controller: _passwordController,
                   decoration: InputDecoration(
                     hintText: '••••••',
                     filled: true,
@@ -169,9 +235,7 @@ class RegisterScreen extends StatelessWidget {
 
                 // button to submit the form
                 ElevatedButton(
-                  onPressed: () {
-                    // TODO: Hook up Firebase sign-up here
-                  },
+                  onPressed: _isLoading ? null : _register,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF5EAAA8),
                     foregroundColor: Colors.white,
@@ -185,7 +249,12 @@ class RegisterScreen extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  child: const Text('sign up'),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(
+                    valueColor:
+                    AlwaysStoppedAnimation<Color>(Colors.white),
+                  )
+                      : const Text('sign up'),
                 ),
 
                 const SizedBox(height: 24),
