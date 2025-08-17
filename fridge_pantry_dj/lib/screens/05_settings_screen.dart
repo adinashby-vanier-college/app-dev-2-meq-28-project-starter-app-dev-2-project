@@ -31,6 +31,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _showCurrentPassword = false;
   bool _showNewPassword = false;
   bool _showConfirmPassword = false;
+  bool _showDeletePassword = false;
 
   @override
   void initState() {
@@ -44,12 +45,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       originalName = user.displayName ?? 'User';
       originalEmail = user.email ?? '';
       // TODO: Load postcode from Firestore/database
-      originalPostcode = 'H2U 8I9';
+      // originalPostcode = 'H2U 8I9';
     } else {
       // Fallback values if no user is logged in
       originalName = 'Hello World';
       originalEmail = 'hello@world.com';
-      originalPostcode = 'H2U 8I9';
+      // originalPostcode = 'H2U 8I9';
     }
 
     nameController.text = originalName;
@@ -250,7 +251,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            backgroundColor: const Color(0xFFD1E8E5),
+            backgroundColor: const Color.fromARGB(255, 235, 253, 251),
             title: Text(
               title,
               style: const TextStyle(
@@ -271,7 +272,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: () => Navigator.pop(context, false),
                 child: const Text(
                   'Cancel',
-                  style: TextStyle(color: Color(0xFF5EAAA8)),
+                  style: TextStyle(color: Color.fromARGB(255, 146, 148, 148)),
                 ),
               ),
               TextButton(
@@ -281,7 +282,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: TextStyle(
                     color: isDestructive
                         ? Colors.red[700]
-                        : const Color(0xFF5EAAA8),
+                        : const Color.fromARGB(255, 20, 170, 165),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -296,61 +297,84 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final TextEditingController passwordController = TextEditingController();
     return await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFD1E8E5),
-        title: const Text(
-          'Enter Password',
-          style: TextStyle(
-            fontFamily: 'NunitoSans',
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1E3D36),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFFD1E8E5),
+          title: const Text(
+            'Enter Password',
+            style: TextStyle(
+              fontFamily: 'NunitoSans',
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E3D36),
+            ),
           ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Please enter your current password to confirm account deletion:',
-              style: TextStyle(
-                fontFamily: 'NunitoSans',
-                color: Color(0xFF1E3D36),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Please enter your current password to confirm account deletion:',
+                style: TextStyle(
+                  fontFamily: 'NunitoSans',
+                  color: Color(0xFF1E3D36),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passwordController,
+                obscureText: !_showDeletePassword,
+                decoration: InputDecoration(
+                  hintText: 'Password',
+                  filled: true,
+                  fillColor: Colors.white.withValues(alpha: 0.7),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _showDeletePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: const Color(0xFF1E3D36),
+                    ),
+                    onPressed: () {
+                      setDialogState(() {
+                        _showDeletePassword = !_showDeletePassword;
+                      });
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _showDeletePassword =
+                    false; // Reset visibility when dialog closes
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Color(0xFF5EAAA8)),
               ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                hintText: 'Password',
-                filled: true,
-                fillColor: Colors.white.withValues(),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
+            TextButton(
+              onPressed: () {
+                _showDeletePassword =
+                    false; // Reset visibility when dialog closes
+                Navigator.pop(context, passwordController.text);
+              },
+              child: Text(
+                'Confirm',
+                style: TextStyle(
+                  color: Colors.red[700],
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Color(0xFF5EAAA8)),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, passwordController.text),
-            child: Text(
-              'Confirm',
-              style: TextStyle(
-                color: Colors.red[700],
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -436,7 +460,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       // Welcome message with dynamic user name
                       Text(
-                        'Hey, ${nameController.text}',
+                        'Hey, ${originalName.isEmpty ? 'User' : originalName}',
                         style: const TextStyle(
                           fontFamily: 'NunitoSans',
                           fontSize: 28,
@@ -490,7 +514,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -508,7 +532,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 16),
           _buildInfoRow('Name', nameController.text),
           _buildInfoRow('Email', emailController.text),
-          _buildInfoRow('Postcode', postcodeController.text),
+          // _buildInfoRow('Postcode', postcodeController.text),
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: _toggleEditInfo,
@@ -562,7 +586,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -685,7 +709,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -722,7 +746,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
+        color: Colors.white.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -817,7 +841,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool showPassword = false;
     VoidCallback toggleVisibility = () {};
 
-    // Determine which visibility state to use based on field type
+    // toogle password visibility
     switch (fieldType) {
       case 'current':
         showPassword = _showCurrentPassword;
@@ -887,7 +911,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
