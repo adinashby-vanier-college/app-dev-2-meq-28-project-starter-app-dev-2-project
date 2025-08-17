@@ -404,7 +404,7 @@ class _RecipeViewerScreenState extends State<RecipeViewerScreen> {
                                         ],
                                       ),
                                     );
-                                  }).toList(),
+                                  }),
                                 ],
                               ),
                             ),
@@ -495,7 +495,7 @@ class _RecipeViewerScreenState extends State<RecipeViewerScreen> {
                                         ],
                                       ),
                                     );
-                                  }).toList(),
+                                  }),
                                 ],
                               ),
                             ),
@@ -504,7 +504,7 @@ class _RecipeViewerScreenState extends State<RecipeViewerScreen> {
                             // Video Link (if available)
                             if (recipe!['strYoutube'] != null &&
                                 recipe!['strYoutube'].toString().isNotEmpty)
-                              Container(
+                              SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(

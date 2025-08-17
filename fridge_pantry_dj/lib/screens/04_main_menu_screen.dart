@@ -44,7 +44,7 @@ class MainMenuScreen extends StatelessWidget {
       _MenuItem('Settings', Icons.settings, '/settings'),
     ];
 
-    Future<void> _signOut() async {
+    Future<void> signOut() async {
       await FirebaseAuth.instance.signOut();
       Navigator.pushReplacementNamed(context, '/login');
     }
@@ -66,7 +66,7 @@ class MainMenuScreen extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.logout, color: Color(0xFF1E3D36)),
                       tooltip: 'Sign out',
-                      onPressed: _signOut,
+                      onPressed: signOut,
                     ),
                     // Title text
                     const Text(

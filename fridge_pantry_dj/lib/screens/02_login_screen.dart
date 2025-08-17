@@ -66,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
         // User cancelled the sign-in flow
         return;
       }
-      final GoogleSignInAuthentication? googleAuth =
+      final GoogleSignInAuthentication googleAuth =
       await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth?.accessToken,
