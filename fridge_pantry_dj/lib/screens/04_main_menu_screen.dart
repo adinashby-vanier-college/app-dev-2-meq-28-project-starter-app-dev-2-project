@@ -2,14 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 // This screen shows the main menu with buttons to different features
-class MainMenuScreen extends StatelessWidget {
+class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Background gradient colors (same as WelcomeScreen)
-    final user = FirebaseAuth.instance.currentUser;
+  State<MainMenuScreen> createState() => _MainMenuScreenState();
+}
 
+class _MainMenuScreenState extends State<MainMenuScreen> {
+  User? user;
+
+  @override
+  void initState() {
+    super.initState();
+    user = FirebaseAuth.instance.currentUser;
+    // Listen for auth state changes to update user info
+    FirebaseAuth.instance.authStateChanges().listen((User? updatedUser) {
+      if (mounted) {
+        setState(() {
+          user = updatedUser;
+        });
+      }
+    });
+  }
+
+  //refresh user data
+  void _refreshUserData() {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      currentUser.reload().then((_) {
+        setState(() {
+          user = FirebaseAuth.instance.currentUser;
+        });
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Background gradient colors
     final bgGradient = const LinearGradient(
       colors: [
@@ -38,7 +68,11 @@ class MainMenuScreen extends StatelessWidget {
     final menuItems = [
       _MenuItem('Add Ingredients', Icons.add, '/add-ingredients'),
       _MenuItem('Recipe Mixer', Icons.fastfood, '/recipe-mixer'),
-      _MenuItem('Magic Recommendations', Icons.auto_awesome, '/magic-recommendations'),
+      _MenuItem(
+        'Magic Recommendations',
+        Icons.auto_awesome,
+        '/magic-recommendations',
+      ),
       _MenuItem('NutriPal', Icons.local_hospital, '/nutripal'),
       _MenuItem('Groceries Around You', Icons.store, '/shop-around'),
       _MenuItem('Settings', Icons.settings, '/settings'),
@@ -90,7 +124,7 @@ class MainMenuScreen extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     user?.displayName != null && user!.displayName!.isNotEmpty
-                        ? 'Hey, ${user.displayName}!'
+                        ? 'Hey, ${user!.displayName}!'
                         : 'Hey there!',
                     style: const TextStyle(
                       fontFamily: 'NunitoSans',
@@ -113,10 +147,21 @@ class MainMenuScreen extends StatelessWidget {
                     final item = menuItems[i];
                     return ElevatedButton(
                       style: buttonStyle,
-                      onPressed: () => Navigator.pushNamed(context, item.route),
+                      onPressed: () async {
+                        if (item.route == '/settings') {
+                          await Navigator.pushNamed(context, item.route);
+                          _refreshUserData(); // Refresh user data when returning from settings
+                        } else {
+                          Navigator.pushNamed(context, item.route);
+                        }
+                      },
                       child: Row(
                         children: [
-                          Icon(item.icon, size: 28, color: const Color(0xFF1E3D36)),
+                          Icon(
+                            item.icon,
+                            size: 28,
+                            color: const Color(0xFF1E3D36),
+                          ),
                           const SizedBox(width: 16),
                           Expanded(
                             child: Text(

@@ -323,7 +323,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               decoration: InputDecoration(
                 hintText: 'Password',
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.7),
+                fillColor: Colors.white.withValues(),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide.none,
@@ -436,7 +436,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       // Welcome message with dynamic user name
                       Text(
-                        'Hey, ${nameController.text.isEmpty ? 'User' : nameController.text}',
+                        'Hey, ${nameController.text}',
                         style: const TextStyle(
                           fontFamily: 'NunitoSans',
                           fontSize: 28,
@@ -490,7 +490,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -887,7 +887,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
