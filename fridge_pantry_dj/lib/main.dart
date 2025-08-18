@@ -13,9 +13,12 @@ import 'screens/05_settings_screen.dart';
 import 'screens/06_add_ingredients_screen.dart';
 import 'screens/07_recipe_mixer_screen.dart';
 import 'screens/07.5_recipe_viewer_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 // where  app starts running
-void main() async {
+Future<void> main() async {
+  await dotenv.load(fileName: "secrets.env");
 //Initialize flutter and Initialize Firebase
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(

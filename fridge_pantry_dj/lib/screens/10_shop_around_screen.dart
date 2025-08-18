@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 class ShopAroundScreen extends StatefulWidget {
   const ShopAroundScreen({super.key});
@@ -19,7 +21,7 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
   String? _errorMessage;
 
   // Enter Google Maps Key (remove before git add)
-  static const String _googleApiKey = '';
+  static String get _googleApiKey => dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
 
   @override
   void initState() {
