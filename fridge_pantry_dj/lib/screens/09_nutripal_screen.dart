@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatMessage {
   final String text;
@@ -78,7 +79,7 @@ class _NutripalScreenState extends State<NutripalScreen> {
   Future<String> _getAIResponse(String userMessage) async {
     try {
       //add env file and hide the api later
-      const String apiKey = '';
+      final String apiKey = dotenv.env['DEEPSEEK_API_KEY'] ?? '';
       const String apiUrl = 'https://api.deepseek.com/chat/completions';
       
       final response = await http.post(
