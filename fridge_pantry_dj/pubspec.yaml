@@ -74,6 +74,7 @@ flutter:
   assets:
     - assets/
     - assets/fonts/
+    - secrets.env
 
   fonts:
     - family: Pacifico
