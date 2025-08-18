@@ -212,7 +212,7 @@ class _NutripalScreenState extends State<NutripalScreen> {
                     ],
                   ),
                   child: const Text(
-                    'Meet NutriPal - Your personal AI Nutritionist',
+                    'Meet NutriPal - Your personal AI Nutritionist-Test',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'NunitoSans',
