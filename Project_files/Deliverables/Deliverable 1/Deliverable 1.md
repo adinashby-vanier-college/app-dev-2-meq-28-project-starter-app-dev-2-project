@@ -136,7 +136,7 @@ The project tasks were distributed among team members as follows:
 
 **2\. NutriPal Chat Interface System**
 
-**Implemented NutriPal Screen (nutripal_screen.dart**)**:
+**Implemented NutriPal Screen (nutripal_screen.dart)**:
 
 * **AI Integration**: DeepSeek API integration with HTTP requests for real-time nutrition advice
 * **Chat Message System**: Custom ChatMessage model with timestamp tracking and user/AI message differentiation
@@ -147,7 +147,7 @@ The project tasks were distributed among team members as follows:
 * **Input Validation**: Message trim validation and empty message prevention
 * **Responsive Design**: Constraint-based message width (70% screen width) with proper alignment for user vs AI messaging 
 
-**3.\ Shop Around Location**
+**3\. Shop Around Location**
 
 **Implemented Shop Around Screen (shop_around_screen.dart)**:
 
