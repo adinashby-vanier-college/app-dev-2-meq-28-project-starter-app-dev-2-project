@@ -1,0 +1,34 @@
+name: Deploy to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.6'
+
+      - name: Install dependencies
+        run: |
+          cd fridge_pantry_dj
+          flutter pub get
+
+      - name: Build Flutter web
+        run: |
+          cd fridge_pantry_dj
+          flutter build web --release
+
+      - name: Deploy to Firebase Hosting
+        run: |
+          cd fridge_pantry_dj
+          npx firebase-tools deploy --only hosting --token "$FIREBASE_TOKEN"
