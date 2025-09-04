@@ -20,7 +20,7 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
-  // Enter Google Maps Key (remove before git add)
+  // google map api (remove before git add) also implement .env
   static String get _googleApiKey => dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
 
   @override
@@ -44,7 +44,7 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
     });
 
     try {
-      // First, geocode the postal code to get coordinates
+      // POSTCODE
       final coordinates = await _geocodePostalCode(postalCode);
       if (coordinates == null) {
         setState(() {
@@ -56,7 +56,7 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
 
       final List<Map<String, dynamic>> allPlaces = [];
 
-      // Search for groceries if selected
+      // Groceru checker
       if (showGroceries) {
         final groceries = await _searchNearbyPlaces(
           coordinates['lat'], 
@@ -66,7 +66,7 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
         allPlaces.addAll(groceries);
       }
 
-      // Search for restaurants if selected
+      // Restaurant CHeker
       if (showRestaurants) {
         final restaurants = await _searchNearbyPlaces(
           coordinates['lat'], 
@@ -214,7 +214,7 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
                 ),
               ),
 
-              // Postal Code Input
+              // Postal UI area Input
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: TextField(
@@ -236,7 +236,6 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
                 ),
               ),
 
-              // Radius Selection drop down
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Row(
@@ -260,7 +259,6 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
                 ),
               ),
 
-              // Checkboxes for filters
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Row(
@@ -282,7 +280,6 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
                 ),
               ),
 
-              // Error Message
               if (_errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -292,7 +289,6 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
                   ),
                 ),
 
-              // Results List
               Expanded(
                 child: _isLoading
                     ? const Center(
@@ -307,7 +303,7 @@ class _ShopAroundScreenState extends State<ShopAroundScreen> {
                 )
                     : _places.isEmpty
                     ? const Center(
-                  child: Text('No places found. Try searching with a postal code.'),
+                  child: Text('No places found. Try New postal code.'),
                 )
                     : ListView.builder(
                   padding: const EdgeInsets.all(16),

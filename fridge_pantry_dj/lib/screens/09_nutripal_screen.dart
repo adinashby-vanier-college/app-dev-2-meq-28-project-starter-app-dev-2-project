@@ -223,7 +223,6 @@ class _NutripalScreenState extends State<NutripalScreen> {
                   ),
                 ),
               ),
-              
               const SizedBox(height: 20),
               
               Expanded(
