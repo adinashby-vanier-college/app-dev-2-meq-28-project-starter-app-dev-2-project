@@ -1,0 +1,13 @@
+
+  2.Database  - 06_add_ingredients_screen.dart
+    - Connect pantry ingredients to Firebase database
+
+  4.Data  - 06_add_ingredients_screen.dart
+    - Save pantry items so they don't disappear when app closes
+
+
+
+User login guest demo
+admin
+admin@admin.com
+admin123
