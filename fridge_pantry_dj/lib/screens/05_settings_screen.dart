@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -9,7 +10,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  // Controllers for text fields
+
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController postcodeController = TextEditingController();
@@ -19,12 +20,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
-  // Original values to restore on cancel
   String originalName = '';
   String originalEmail = '';
   String originalPostcode = '';
 
-  // UI state variables
   bool _isEditingInfo = false;
   bool _isChangingPassword = false;
   bool _isLoading = false;
@@ -39,43 +38,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadUserData();
   }
 
-  void _loadUserData() {
+  void _loadUserData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       originalName = user.displayName ?? 'User';
       originalEmail = user.email ?? '';
-      // TODO: Load postcode from Firestore/database
-      // originalPostcode = 'H2U 8I9';
+      
+      // Load postcode from FBRD
+      try {
+        final database = FirebaseDatabase.instance;
+        final userRef = database.ref('users/${user.uid}');
+        final snapshot = await userRef.get();
+        
+        if (snapshot.exists) {
+          final userData = snapshot.value as Map<dynamic, dynamic>;
+          originalPostcode = userData['postcode'] ?? '';
+        }
+      } catch (e) {
+        originalPostcode = '';
+      }
     } else {
-      // Fallback values if no user is logged in
+
       originalName = 'Hello World';
       originalEmail = 'hello@world.com';
-      // originalPostcode = 'H2U 8I9';
+      originalPostcode = '';
     }
 
     nameController.text = originalName;
     emailController.text = originalEmail;
     postcodeController.text = originalPostcode;
+    
+    if (mounted) setState(() {});
   }
 
   void _toggleEditInfo() {
     setState(() {
       if (_isEditingInfo) {
-        // Cancel editing - restore original values
         nameController.text = originalName;
         emailController.text = originalEmail;
         postcodeController.text = originalPostcode;
       }
       _isEditingInfo = !_isEditingInfo;
-      _isChangingPassword = false; // Close password change if open
+      _isChangingPassword = false;
     });
   }
 
   void _toggleChangePassword() {
     setState(() {
       _isChangingPassword = !_isChangingPassword;
-      _isEditingInfo = false; // Close info editing if open
-      // Clear password fields
+      _isEditingInfo = false;
+
       currentPasswordController.clear();
       newPasswordController.clear();
       confirmPasswordController.clear();
@@ -87,23 +99,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        // Update display name
+
         if (nameController.text.trim() != originalName) {
           await user.updateDisplayName(nameController.text.trim());
         }
 
-        // Update email if changed
+
         if (emailController.text.trim() != originalEmail) {
           await user.verifyBeforeUpdateEmail(emailController.text.trim());
         }
 
-        // TODO: Save postcode to Firestore/database
-        // Example: await FirebaseFirestore.instance
-        //   .collection('users')
-        //   .doc(user.uid)
-        //   .update({'postcode': postcodeController.text.trim()});
+        // Save postcode FBRT
+        final database = FirebaseDatabase.instance;
+        final userRef = database.ref('users/${user.uid}');
+        await userRef.update({'postcode': postcodeController.text.trim()});
 
-        // Update original values
+
         setState(() {
           originalName = nameController.text.trim();
           originalEmail = emailController.text.trim();
@@ -137,14 +148,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        // Re-authenticate user with current password
+
+
         final credential = EmailAuthProvider.credential(
           email: user.email!,
           password: currentPasswordController.text,
         );
         await user.reauthenticateWithCredential(credential);
 
-        // Update password
+
         await user.updatePassword(newPasswordController.text);
 
         setState(() => _isChangingPassword = false);
@@ -195,29 +207,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'Are you sure you want to permanently delete your account? This action cannot be undone.',
       isDestructive: true,
     );
-
+    //Ask password when deleting
     if (shouldDelete) {
-      // Ask for password confirmation for security
+
       final password = await _showPasswordDialog();
       if (password != null) {
         setState(() => _isLoading = true);
         try {
           final user = FirebaseAuth.instance.currentUser;
           if (user != null) {
-            // Re-authenticate before deletion
+            // Re-authenticate before deleting
             final credential = EmailAuthProvider.credential(
               email: user.email!,
               password: password,
             );
             await user.reauthenticateWithCredential(credential);
 
-            // TODO: Delete user data from Firestore/database before deleting account
-            // Example: await FirebaseFirestore.instance
-            //   .collection('users')
-            //   .doc(user.uid)
-            //   .delete();
+            // Delete user from FBRD
+            final database = FirebaseDatabase.instance;
+            final userRef = database.ref('users/${user.uid}');
+            await userRef.remove();
 
-            // Delete the user account
             await user.delete();
 
             if (mounted) {
@@ -312,7 +322,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Please enter your current password to confirm account deletion:',
+                'Enter password to delete account:',
                 style: TextStyle(
                   fontFamily: 'NunitoSans',
                   color: Color(0xFF1E3D36),
@@ -351,7 +361,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             TextButton(
               onPressed: () {
                 _showDeletePassword =
-                    false; // Reset visibility when dialog closes
+                    false;
                 Navigator.pop(context);
               },
               child: const Text(
@@ -362,7 +372,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             TextButton(
               onPressed: () {
                 _showDeletePassword =
-                    false; // Reset visibility when dialog closes
+                    false;
                 Navigator.pop(context, passwordController.text);
               },
               child: Text(
@@ -458,7 +468,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Welcome message with dynamic user name
+
                       Text(
                         'Hey, ${originalName.isEmpty ? 'User' : originalName}',
                         style: const TextStyle(
@@ -532,7 +542,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 16),
           _buildInfoRow('Name', nameController.text),
           _buildInfoRow('Email', emailController.text),
-          // _buildInfoRow('Postcode', postcodeController.text),
+          _buildInfoRow('Postcode', postcodeController.text),
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: _toggleEditInfo,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 // Screen for creating a new account
 class RegisterScreen extends StatefulWidget {
@@ -13,6 +14,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _postcodeController = TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -20,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _postcodeController.dispose();
     super.dispose();
   }
 
@@ -27,7 +30,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+    final postcode = _postcodeController.text.trim();
+    
+    if (name.isEmpty || email.isEmpty || password.isEmpty || postcode.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill out all fields')),
       );
@@ -42,19 +47,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password: password,
       );
 
-      // Store the user's display name
+      // FBRD display name
       await userCredential.user?.updateDisplayName(name);
       await userCredential.user?.reload();
 
+      // User FBRD
+      if (userCredential.user != null) {
+        try {
+          final database = FirebaseDatabase.instance;
+          final userRef = database.ref('users/${userCredential.user!.uid}');
+          
+          Map<String, dynamic> userData = {
+            'name': name,
+            'email': email,
+            'postcode': postcode,
+            'registrationDate': DateTime.now().millisecondsSinceEpoch,
+            'preferences': {},
+          };
+          
+          await userRef.set(userData);
+        } catch (dbError) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Account created but profile save failed: $dbError')),
+            );
+          }
+        }
+      }
+
       if (mounted) {
-        // Navigate to the main menu upon successful registration
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account created successfully!'),
+            backgroundColor: Color(0xFF5EAAA8),
+          ),
+        );
         Navigator.pushReplacementNamed(context, '/main-menu');
       }
     } on FirebaseAuthException catch (e) {
       // Handle common errors
       String message;
       if (e.code == 'weak-password') {
-        message = 'The password provided is too weak.';
+        message = 'The password is too weak.';
       } else if (e.code == 'email-already-in-use') {
         message = 'An account already exists for that email.';
       } else {
@@ -62,6 +96,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
+      );
+    } catch (e) {
+      // FBRD errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save user data: $e')),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -229,6 +268,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   obscureText: true,
+                ),
+
+                const SizedBox(height: 20),
+
+                // Postcode label and text box
+                const Text(
+                  'POSTCODE',
+                  style: TextStyle(
+                    fontFamily: 'NunitoSans',
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1E3D36),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _postcodeController,
+                  decoration: InputDecoration(
+                    hintText: 'H2U 8I9',
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.7),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  textCapitalization: TextCapitalization.characters,
                 ),
 
                 const SizedBox(height: 32),
