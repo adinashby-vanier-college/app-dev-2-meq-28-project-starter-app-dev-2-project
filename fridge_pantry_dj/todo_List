@@ -1,0 +1,10 @@
+ 1. Step 1: Fix User Registration - 03_register_screen.dart
+    - Fix user registration to save user data properly
+  2. Step 2: Database Integration - 06_add_ingredients_screen.dart
+    - Connect pantry ingredients to Firebase database
+  3. Step 3: Login Validation - 02_login_screen.dart
+    - Add user login validation
+  4. Step 4: Data Persistence - 06_add_ingredients_screen.dart
+    - Save pantry items so they don't disappear when app closes
+  5. Step 5: Error Handling - 02_login_screen.dart & 03_register_screen.dart
+    - Add basic error messages for login/register
